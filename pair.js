@@ -800,55 +800,8 @@ ${tvDownloads.map((d, i) => `▫️ *${(i + 1).toString().padStart(2, '0')} ❱�
     }
 
     break;
-    case 'menu':
-               case 'alive':     {
-    try {
-        const pushName = msg.pushName || 'User';
-        const date = new Date();
-        const slstDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Colombo" }));
-        const formattedDate = `${slstDate.getFullYear()}/${slstDate.getMonth() + 1}/${slstDate.getDate()}`;
-        const formattedTime = slstDate.toLocaleTimeString();
-        
-        const hour = slstDate.getHours();
-      
-        const greetings = hour < 12 ? `Good Morning✨` :
-                          hour < 15 ? `Good Afternoon🚀` :
-                          hour < 18 ? `Good Evening! 🌟` : `Good Night🌙`;
-        const prefix = sessionConfig.PREFIX || config.PREFIX || '.';
-
-        // Main Menu (Number reply removed)
-        const mainMenuMsg = `*🌟 𝙃𝙚𝙮 ❟ ${pushName} ✨𝙃𝙤𝙬 𝙖𝙧𝙚 𝙮𝙤𝙪.*      
-*╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」*
-*┃ \`🐸 ${greetings}\`*
-*┃ \`🧩 𝚃𝚒𝚖𝚎\` : ${formattedTime}*
-*┃ \`🦊 𝙳𝚊𝚝𝚎\` : ${formattedDate}*
-*┃ \`🤡 𝙱𝚘𝚝 𝙽𝚊𝚖𝚎:\` ꜱʜᴀɢɢY ꜰʀᴇᴇ*
-*┃ \`🐞 𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖:\` Linux*
-*╰────────●●►*    
-*╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」*
-│ 🎡 .film
-│ 🎡 .thenkiri
-│ 🎡 .ping
-│ 🎡 .song
-│ 🎡 .tiktok
-│ 🎡 .menu
-│ 🎡 .alive
-*╰────────●●►*   
-> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
-
-        await socket.sendMessage(sender, {
-            image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE},
-            caption: mainMenuMsg
-        }, { quoted: msg });
-
-       
-
-    } catch (e) {
-        console.error(e);
-    }
 }
-break;    
-case 'thenkiri': {
+ case 'thenkiri': {
     if (!args.length) {
         await socket.sendMessage(sender, {
             image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
@@ -1109,7 +1062,55 @@ case 'thenkiri': {
     }
 
     break;
+                        }                   
+    case 'menu':
+               case 'alive':     {
+    try {
+        const pushName = msg.pushName || 'User';
+        const date = new Date();
+        const slstDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Colombo" }));
+        const formattedDate = `${slstDate.getFullYear()}/${slstDate.getMonth() + 1}/${slstDate.getDate()}`;
+        const formattedTime = slstDate.toLocaleTimeString();
+        
+        const hour = slstDate.getHours();
+      
+        const greetings = hour < 12 ? `Good Morning✨` :
+                          hour < 15 ? `Good Afternoon🚀` :
+                          hour < 18 ? `Good Evening! 🌟` : `Good Night🌙`;
+        const prefix = sessionConfig.PREFIX || config.PREFIX || '.';
+
+        // Main Menu (Number reply removed)
+        const mainMenuMsg = `*🌟 𝙃𝙚𝙮 ❟ ${pushName} ✨𝙃𝙤𝙬 𝙖𝙧𝙚 𝙮𝙤𝙪.*      
+*╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」*
+*┃ \`🐸 ${greetings}\`*
+*┃ \`🧩 𝚃𝚒𝚖𝚎\` : ${formattedTime}*
+*┃ \`🦊 𝙳𝚊𝚝𝚎\` : ${formattedDate}*
+*┃ \`🤡 𝙱𝚘𝚝 𝙽𝚊𝚖𝚎:\` ꜱʜᴀɢɢY ꜰʀᴇᴇ*
+*┃ \`🐞 𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖:\` Linux*
+*╰────────●●►*    
+*╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」*
+│ 🎡 .film
+│ 🎡 .thenkiri
+│ 🎡 .ping
+│ 🎡 .song
+│ 🎡 .tiktok
+│ 🎡 .menu
+│ 🎡 .alive
+*╰────────●●►*   
+> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
+
+        await socket.sendMessage(sender, {
+            image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE},
+            caption: mainMenuMsg
+        }, { quoted: msg });
+
+       
+
+    } catch (e) {
+        console.error(e);
+    }
 }
+break;   
                 case 'set':
                 case 'setting': {
                     if (!isOwner) {
