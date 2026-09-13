@@ -800,9 +800,7 @@ ${tvDownloads.map((d, i) => `▫️ *${(i + 1).toString().padStart(2, '0')} ❱�
     }
 
     break;
-      
-                 
-    break; case 'menu':
+    case 'menu':
                case 'alive':     {
     try {
         const pushName = msg.pushName || 'User';
