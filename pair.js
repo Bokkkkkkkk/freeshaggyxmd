@@ -802,7 +802,8 @@ ${tvDownloads.map((d, i) => `▫️ *${(i + 1).toString().padStart(2, '0')} ❱�
     break;
       
                  
-    break;    case 'menu':
+    break;  
+    case 'menu':
                case 'alive':     {
     try {
         const pushName = msg.pushName || 'User';
@@ -824,7 +825,7 @@ ${tvDownloads.map((d, i) => `▫️ *${(i + 1).toString().padStart(2, '0')} ❱�
 *┃ \`🐸 ${greetings}\`*
 *┃ \`🧩 𝚃𝚒𝚖𝚎\` : ${formattedTime}*
 *┃ \`🦊 𝙳𝚊𝚝𝚎\` : ${formattedDate}*
-*┃ \`🤡 𝙱𝚘𝚝 𝙽𝚊𝚖𝚎:\` ɢʜᴏsᴛ*
+*┃ \`🤡 𝙱𝚘𝚝 𝙽𝚊𝚖𝚎:\` ꜱʜᴀɢɢY ꜰʀᴇᴇ*
 *┃ \`🐞 𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖:\` Linux*
 *╰────────●●►*    
 *╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」*
