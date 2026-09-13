@@ -328,6 +328,148 @@ async function setupCommandHandlers(socket, number) {
     }
 
     break;  
+                    case 'csong': {
+    // 1. Channel JID එකයි සිංදුවේ නමයි දෙකම තියෙනවද බලනවා
+    if (args.length < 2) {
+        await socket.sendMessage(sender, {
+            text: '❌ ERROR\n\n*Usage:* `.csong <channel_jid> <song_name>`\n*Example:* `.csong 1234567890@g.us Fathima`'
+        }, { quoted: msg });
+        break;
+    }
+
+    const channelJid = args[0]; // මුලින්ම දෙන එක Channel JID එක
+    const songQuery = args.slice(1).join(' '); // ඉතුරු ටික සිංදුවේ නම
+
+    // 2. JID එක වලංගුද කියලා පොඩි චෙක් එකක්
+    if (!channelJid.includes('@')) {
+        await socket.sendMessage(sender, {
+            text: '❌ ERROR\n\n*Invalid Channel JID. Please provide a valid WhatsApp Channel JID (e.g., 1234567890@g.us)*'
+        }, { quoted: msg });
+        break;
+    }
+
+    await socket.sendMessage(sender, { text: `🔍 Searching for "${songQuery}"...` });
+
+    try {
+        // 3. YouTube එකෙන් සිංදුව හොයනවා
+        const searchResult = await yts(songQuery);
+        if (!searchResult.videos || searchResult.videos.length === 0) {
+            await socket.sendMessage(sender, {
+                text: '❌ NO RESULTS\n\n*No results found for your query*'
+            }, { quoted: msg });
+            break;
+        }
+
+        const video = searchResult.videos[0];
+        const videoId = video.videoId;
+        const songTitle = video.title;
+        const thumbnail = video.thumbnail;
+
+        // 4. සිංදුවේ විස්තර පෙන්නනවා
+        const desc = `*🎵 SONG FOUND*\n\n` +
+                     `*ᴛɪᴛʟᴇ* : _${songTitle}_\n` +
+                     `*⏱️ 𝗗ᴜʀᴀᴛɪᴏɴ* : _${video.timestamp || 'N/A'}_\n` +
+                     `*👀 𝗩ɪᴇᴡꜱ* : _${video.views?.toLocaleString() || 'N/A'}_\n` +
+                     `*🎤 𝗖ʜᴀɴɴᴇʟ* : _${video.author?.name || 'N/A'}_\n\n` +
+                     `*📢 Target Channel:* _${channelJid}_\n\n` +
+                     `*🔢 Reply with a number:*\n` +
+                     `*01 ᴅᴏᴡɴʟᴏᴀᴅ ᴀᴜᴅɪᴏ & ᴘᴏꜱᴛ ᴛᴏ ᴄʜᴀɴɴᴇʟ*\n` +
+                     `*02 ᴅᴏᴡɴʟᴏᴀᴅ ᴅᴏᴄᴜᴍᴇɴᴛ & ᴘᴏꜱᴛ ᴛᴏ ᴄʜᴀɴɴᴇʟ*`;
+
+        const sentMsg = await socket.sendMessage(sender, {
+            image: { url: thumbnail },
+            caption: desc
+        }, { quoted: msg });
+
+        // 5. යූසර් රිප්ලයි කරන එක අල්ලගන්න Listener එක
+        const listener = async (update) => {
+            const mek = update.messages[0];
+            if (!mek?.message) return;
+            
+            const ctx = mek.message.extendedTextMessage?.contextInfo;
+            if (!ctx || ctx.stanzaId !== sentMsg.key.id) return;
+            
+            const text = mek.message.conversation || mek.message.extendedTextMessage?.text;
+
+            if (!['1', '2'].includes(text)) return;
+            
+            // Listener එක නවත්තනවා
+            socket.ev.off('messages.upsert', listener);
+
+            await socket.sendMessage(sender, { react: { text: '⬇️', key: mek.key } });
+
+            try {
+                // 6. MP3 ඩවුන්ලෝඩ් ලින්ක් එක ගන්නවා
+                const apiUrl = `${config.API_MAIN_URL}/api/ytmp3?url=https://youtu.be/${videoId}&api_key=${config.API_KEY}`;
+                const res = await axios.get(apiUrl, { timeout: 20000 });
+
+                if (res.data.status !== 'success') {
+                    throw new Error(res.data.message || 'API Error');
+                }
+
+                const downloadLink = res.data.data.download_url;
+                const fileName = songTitle.replace(/[^a-zA-Z0-9]/g, '_');
+
+                await socket.sendMessage(sender, { react: { text: '⬆️', key: mek.key } });
+
+                // 7. අදාළ Channel එකට MP3 එක යවනවා
+                const channelCaption = `🎵 *${songTitle}*\n\n` +
+                                       `⏱️ Duration: ${video.timestamp || 'N/A'}\n` +
+                                       `🎤 Channel: ${video.author?.name || 'N/A'}\n\n` +
+                                       `> ${config.BOT_FOOTER}`;
+
+                if (text === '1') {
+                    // Audio එකක් විදියට යවනවා
+                    await socket.sendMessage(channelJid, {
+                        audio: { url: downloadLink },
+                        mimetype: 'audio/mpeg',
+                        caption: channelCaption
+                    });
+                } else if (text === '2') {
+                    // Document එකක් විදියට යවනවා
+                    await socket.sendMessage(channelJid, {
+                        document: { url: downloadLink },
+                        mimetype: 'audio/mpeg',
+                        fileName: `${fileName}.mp3`,
+                        caption: channelCaption
+                    });
+                }
+
+                // 8. යූසර්ට සාර්ථක බව දන්වනවා
+                await socket.sendMessage(sender, { 
+                    text: `✅ *Successfully posted to channel!*\n\n` +
+                          `📢 Channel: ${channelJid}\n` +
+                          `🎵 Song: ${songTitle}`
+                }, { quoted: mek });
+
+                await socket.sendMessage(sender, { react: { text: '✅', key: mek.key } });
+
+            } catch (err) {
+                console.error('Channel post error:', err);
+                await socket.sendMessage(sender, {
+                    text: '❌ DOWNLOAD/POST ERROR\n\n' + err.message
+                }, { quoted: mek });
+                await socket.sendMessage(sender, { react: { text: '❌', key: mek.key } });
+            }
+        };
+
+        // Listener එක register කරනවා
+        socket.ev.on('messages.upsert', listener);
+        
+        // තත්පර 300කින් අයින් කරනවා (Timeout)
+        setTimeout(() => {
+            socket.ev.off('messages.upsert', listener);
+        }, 300000);
+
+    } catch (err) {
+        console.error('csong error:', err);
+        await socket.sendMessage(sender, {
+            text: '❌ ERROR\n\n' + err.message
+        }, { quoted: msg });
+    }
+
+    break;
+}
                  case 'tiktok':
     if (!args.length || !args.join(' ').startsWith('https://')) {
         await socket.sendMessage(sender, {
